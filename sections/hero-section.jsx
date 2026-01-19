@@ -1,6 +1,7 @@
 import TiltedImage from "@/components/tilt-image";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function HeroSection() {
     return (
@@ -50,10 +51,12 @@ export default function HeroSection() {
                 viewport={{ once: true }}
                 transition={{ type: "spring", stiffness: 320, damping: 70, mass: 1 }}
             >
-                <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 transition text-white active:scale-95 rounded-lg px-7 h-11">
-                    Get started
-                    <ArrowRight className="size-5" />
-                </button>
+                <Link href="/register">
+                    <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 transition text-white active:scale-95 rounded-lg px-7 h-11">
+                        Get started
+                        <ArrowRight className="size-5" />
+                    </button>
+                </Link>
                 <button className="border border-slate-400 active:scale-95 hover:bg-white/10 transition rounded-lg px-8 h-11">
                     Book a demo
                 </button>

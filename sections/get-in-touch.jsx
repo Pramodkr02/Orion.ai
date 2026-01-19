@@ -1,3 +1,5 @@
+"use client";
+
 import SectionTitle from "@/components/section-title";
 import { ArrowUpRight, SendIcon } from "lucide-react";
 import { motion } from "framer-motion";
