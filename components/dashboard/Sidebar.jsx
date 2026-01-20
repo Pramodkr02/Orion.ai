@@ -26,7 +26,7 @@ const menuItems = [
     name: "ATS Score Check",
     icon: BarChart,
     href: "/dashboard/ats",
-    disabled: true,
+    disabled: false,
   },
   { name: "Resume Builder", icon: FileText, href: "/dashboard", active: true },
   {
