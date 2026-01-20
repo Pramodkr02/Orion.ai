@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   UploadCloud,
@@ -18,20 +18,11 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// --- Mock Data ---
-const MOCK_SCORE = 82;
-const SECTIONS = [
-  { name: "Architecture", score: 98, icon: Layout },
-  { name: "Content Quality", score: 65, icon: Type },
-  { name: "Keywords Match", score: 72, icon: Search },
-  { name: "Formatting", score: 90, icon: FileCheck },
-  { name: "Readability", score: 80, icon: FileText },
-];
-
 export default function ATSPage() {
   const [step, setStep] = useState("upload"); // upload | analyzing | result
   const [file, setFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
 
   // --- Handlers ---
   const handleDragOver = (e) => {
@@ -61,11 +52,6 @@ export default function ATSPage() {
       setFile(file);
       toast.success(`${file.name} uploaded successfully!`, {
         position: "bottom-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
         theme: "dark",
       });
     } else {
@@ -75,17 +61,37 @@ export default function ATSPage() {
     }
   };
 
-  const startAnalysis = () => {
+  const startAnalysis = async () => {
     if (!file) return;
     setStep("analyzing");
-    // Mock API delay
-    setTimeout(() => {
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/api/ats/analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Analysis failed");
+      }
+
+      setAnalysisResult(result.data);
       setStep("result");
-    }, 3500);
+    } catch (error) {
+      console.error("Analysis Error:", error);
+      toast.error(error.message || "Something went wrong. Please try again.");
+      setStep("upload");
+    }
   };
 
   const resetFlow = () => {
     setFile(null);
+    setAnalysisResult(null);
     setStep("upload");
   };
 
@@ -122,8 +128,13 @@ export default function ATSPage() {
             />
           )}
           {step === "analyzing" && <LoaderView key="analyzing" />}
-          {step === "result" && (
-            <ResultView key="result" file={file} onReset={resetFlow} />
+          {step === "result" && analysisResult && (
+            <ResultView
+              key="result"
+              file={file}
+              result={analysisResult}
+              onReset={resetFlow}
+            />
           )}
         </AnimatePresence>
       </div>
@@ -223,15 +234,17 @@ function LoaderView() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    // Determine approximate time based on expected AI latency (e.g. 5-8 seconds)
+    // We'll increment progress slowly to keep user engaged.
     const timer = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(timer);
-          return 100;
+        if (prev >= 95) {
+            // Hang at 95 until real response comes
+          return 95;
         }
         return prev + 1;
       });
-    }, 30); // ~3.5s total
+    }, 100); 
     return () => clearInterval(timer);
   }, []);
 
@@ -267,11 +280,23 @@ function LoaderView() {
   );
 }
 
-function ResultView({ file, onReset }) {
+function ResultView({ file, result, onReset }) {
+  const score = result.overall_score || 0;
+  
+  // Map result sections to UI format
+  // Ensure we handle missing keys gracefully with defaults
+  const sections = [
+    { name: "Architecture", score: result.sections?.architecture || 0, icon: Layout },
+    { name: "Content Quality", score: result.sections?.content || 0, icon: Type },
+    { name: "Keywords Match", score: result.sections?.keywords || 0, icon: Search },
+    { name: "Formatting", score: result.sections?.formatting || 0, icon: FileCheck },
+    { name: "Readability", score: result.sections?.readability || 0, icon: FileText },
+  ];
+
   // --- Score Circle Logic ---
   const radius = 50;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (MOCK_SCORE / 100) * circumference;
+  const strokeDashoffset = circumference - (score / 100) * circumference;
 
   return (
     <motion.div
@@ -309,9 +334,9 @@ function ResultView({ file, onReset }) {
                 strokeDasharray={circumference}
                 strokeLinecap="round"
                 className={`${
-                  MOCK_SCORE >= 80
+                  score >= 80
                     ? "text-green-500"
-                    : MOCK_SCORE >= 60
+                    : score >= 60
                       ? "text-yellow-500"
                       : "text-red-500"
                 }`}
@@ -319,7 +344,7 @@ function ResultView({ file, onReset }) {
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-3xl font-bold text-white">
-                {MOCK_SCORE}
+                {score}
               </span>
               <span className="text-xs text-gray-400 uppercase tracking-wide">
                 Score
@@ -329,15 +354,16 @@ function ResultView({ file, onReset }) {
 
           <div className="text-center sm:text-left z-10">
             <div className="flex items-center justify-center sm:justify-start gap-2 mb-2">
-              <CheckCircle className="w-5 h-5 text-green-500" />
-              <span className="text-green-500 font-medium">Strong Match</span>
+              <CheckCircle className={`w-5 h-5 ${score >= 70 ? "text-green-500" : "text-yellow-500"}`} />
+              <span className={`${score >= 70 ? "text-green-500" : "text-yellow-500"} font-medium`}>
+                {score >= 85 ? "Excellent Match" : score >= 70 ? "Good Match" : "Needs Improvement"}
+              </span>
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">
-              Great Job! Your resume is ATS friendly.
+                {score >= 80 ? "Great Job! Your resume is ATS friendly." : "Feedback Available"}
             </h2>
             <p className="text-gray-400 text-sm">
-              Your resume scores higher than 85% of other candidates. A few
-              minor tweaks could take it to the top level.
+              {result.summary || "Your resume has been analyzed."}
             </p>
           </div>
         </div>
@@ -349,7 +375,7 @@ function ResultView({ file, onReset }) {
             Detailed Breakdown
           </h3>
           <div className="space-y-6">
-            {SECTIONS.map((section, index) => (
+            {sections.map((section, index) => (
               <div key={section.name}>
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex items-center gap-3">
