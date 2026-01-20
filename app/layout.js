@@ -1,6 +1,7 @@
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import LenisScroll from "@/components/lenis-scroll";
+import { AuthProvider } from "@/context/AuthContext";
 
 const poppins = Poppins({
     subsets: ["latin"],
@@ -21,8 +22,10 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <body className={poppins.variable}>
-                <LenisScroll />
-                {children}
+                <AuthProvider>
+                    <LenisScroll />
+                    {children}
+                </AuthProvider>
             </body>
         </html>
     );

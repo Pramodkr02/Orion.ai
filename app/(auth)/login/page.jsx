@@ -1,9 +1,26 @@
 "use client";
 
+import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
+import Link from "next/link";
+import { Loader2 } from "lucide-react";
+
 export default function SignIn() {
-  const handleSubmit = (e) => {
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // handle login logic here
+    setIsSubmitting(true);
+    try {
+      await login(email, password);
+    } catch (error) {
+      // Error is handled in context
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -22,7 +39,10 @@ export default function SignIn() {
           type="email"
           id="email"
           name="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
+          required
           className="w-full p-2 mb-3 bg-slate-900 border border-slate-700 rounded-md focus:outline-none focus:ring-1 transition focus:ring-indigo-500 focus:border-indigo-500"
         />
 
@@ -36,7 +56,10 @@ export default function SignIn() {
           type="password"
           id="password"
           name="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
+          required
           className="w-full p-2 mb-2 bg-slate-900 border border-slate-700 rounded-md focus:outline-none focus:ring-1 transition focus:ring-indigo-500 focus:border-indigo-500"
         />
 
@@ -51,11 +74,23 @@ export default function SignIn() {
 
         <button
           type="submit"
-          className="w-full mt-10 px-4 py-2.5 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          disabled={isSubmitting}
+          className="w-full mt-10 px-4 py-2.5 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          Sign in
+          {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Signing in...
+              </>
+          ) : "Sign in"}
         </button>
       </form>
+       <div className="mt-4 text-center text-slate-400">
+         Don't have an account?{" "}
+         <Link href="/register" className="text-indigo-500 hover:text-indigo-400 font-medium">
+            Sign up
+         </Link>
+       </div>
     </div>
   );
 }

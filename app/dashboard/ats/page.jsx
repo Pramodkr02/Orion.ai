@@ -96,9 +96,12 @@ export default function ATSPage() {
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">ATS Score Checker</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">
+          ATS Score Checker
+        </h1>
         <p className="text-gray-400">
-          Optimize your resume for Applicant Tracking Systems and get hired faster.
+          Optimize your resume for Applicant Tracking Systems and get hired
+          faster.
         </p>
       </div>
 
@@ -149,7 +152,7 @@ function UploadView({
     >
       <div
         className={`
-          border-2 border-dashed rounded-3xl p-12 text-center transition-all duration-300 ease-in-out
+          border-2 border-dashed rounded p-12 text-center transition-all duration-300 ease-in-out
           flex flex-col items-center justify-center min-h-[400px]
           ${
             isDragging
@@ -170,7 +173,8 @@ function UploadView({
               Upload your resume
             </h3>
             <p className="text-gray-400 mb-8 max-w-md">
-              Drag and drop your resume (PDF only) here, or click to browse. We'll analyze it against industry standards.
+              Drag and drop your resume (PDF only) here, or click to browse.
+              We'll analyze it against industry standards.
             </p>
             <label className="relative group cursor-pointer inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl font-medium transition-all shadow-lg hover:shadow-indigo-500/25">
               <span>Choose PDF File</span>
@@ -267,8 +271,7 @@ function ResultView({ file, onReset }) {
   // --- Score Circle Logic ---
   const radius = 50;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset =
-    circumference - (MOCK_SCORE / 100) * circumference;
+  const strokeDashoffset = circumference - (MOCK_SCORE / 100) * circumference;
 
   return (
     <motion.div
@@ -279,9 +282,9 @@ function ResultView({ file, onReset }) {
       {/* LEFT COLUMN: Report */}
       <div className="lg:col-span-7 space-y-6">
         {/* Overall Score Card */}
-        <div className="bg-[#111111] border border-gray-800 rounded-3xl p-8 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden group">
+        <div className="bg-[#111111] border border-gray-800 rounded p-8 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-          
+
           <div className="relative w-32 h-32 flex-shrink-0">
             <svg className="w-full h-full transform -rotate-90">
               <circle
@@ -306,12 +309,18 @@ function ResultView({ file, onReset }) {
                 strokeDasharray={circumference}
                 strokeLinecap="round"
                 className={`${
-                    MOCK_SCORE >= 80 ? "text-green-500" : MOCK_SCORE >= 60 ? "text-yellow-500" : "text-red-500"
+                  MOCK_SCORE >= 80
+                    ? "text-green-500"
+                    : MOCK_SCORE >= 60
+                      ? "text-yellow-500"
+                      : "text-red-500"
                 }`}
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold text-white">{MOCK_SCORE}</span>
+              <span className="text-3xl font-bold text-white">
+                {MOCK_SCORE}
+              </span>
               <span className="text-xs text-gray-400 uppercase tracking-wide">
                 Score
               </span>
@@ -327,13 +336,14 @@ function ResultView({ file, onReset }) {
               Great Job! Your resume is ATS friendly.
             </h2>
             <p className="text-gray-400 text-sm">
-              Your resume scores higher than 85% of other candidates. A few minor tweaks could take it to the top level.
+              Your resume scores higher than 85% of other candidates. A few
+              minor tweaks could take it to the top level.
             </p>
           </div>
         </div>
 
         {/* Breakdown Section */}
-        <div className="bg-[#111111] border border-gray-800 rounded-3xl p-8">
+        <div className="bg-[#111111] border border-gray-800 rounded p-8">
           <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-purple-500" />
             Detailed Breakdown
@@ -358,7 +368,11 @@ function ResultView({ file, onReset }) {
                     animate={{ width: `${section.score}%` }}
                     transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
                     className={`h-full rounded-full ${
-                        section.score >= 80 ? 'bg-green-500' : section.score >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                      section.score >= 80
+                        ? "bg-green-500"
+                        : section.score >= 60
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
                     }`}
                   />
                 </div>
@@ -371,30 +385,30 @@ function ResultView({ file, onReset }) {
       {/* RIGHT COLUMN: Preview & Action */}
       <div className="lg:col-span-5 space-y-6">
         {/* PDF Preview Mock */}
-        <div className="bg-gray-100 rounded-3xl p-4 h-[500px] relative overflow-hidden group shadow-2xl">
-            {/* Simple CSS-based resume mockup */}
-            <div className="w-full h-full bg-white shadow-inner rounded-xl p-8 overflow-hidden opacity-90 transform group-hover:scale-[1.02] transition-transform duration-500">
-               <div className="w-24 h-24 bg-gray-200 rounded-full mb-6 mx-auto"></div>
-               <div className="h-6 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
-               <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto mb-12"></div>
-               
-               <div className="space-y-4">
-                   <div className="h-4 bg-gray-200 rounded w-full"></div>
-                   <div className="h-4 bg-gray-200 rounded w-full"></div>
-                   <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                   <br/>
-                   <div className="h-4 bg-gray-200 rounded w-full"></div>
-                   <div className="h-4 bg-gray-200 rounded w-11/12"></div>
-               </div>
-               
-                 <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"/>
+        <div className="bg-gray-100 rounded p-4 h-[610px] relative overflow-hidden group shadow-2xl">
+          {/* Simple CSS-based resume mockup */}
+          <div className="w-full h-full bg-white shadow-inner rounded-xl p-8 overflow-hidden opacity-90 transform group-hover:scale-[1.02] transition-transform duration-500">
+            <div className="w-24 h-24 bg-gray-200 rounded-full mb-6 mx-auto"></div>
+            <div className="h-6 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto mb-12"></div>
+
+            <div className="space-y-4">
+              <div className="h-4 bg-gray-200 rounded w-full"></div>
+              <div className="h-4 bg-gray-200 rounded w-full"></div>
+              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+              <br />
+              <div className="h-4 bg-gray-200 rounded w-full"></div>
+              <div className="h-4 bg-gray-200 rounded w-11/12"></div>
             </div>
-            
-            <div className="absolute top-6 right-6">
-                <span className="bg-black/70 backdrop-blur text-white text-xs px-3 py-1 rounded-full">
-                    {file ? file.name : "Resume.pdf"}
-                </span>
-            </div>
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+          </div>
+
+          <div className="absolute top-6 right-6">
+            <span className="bg-black/70 backdrop-blur text-white text-xs px-3 py-1 rounded-full">
+              {file ? file.name : "Resume.pdf"}
+            </span>
+          </div>
         </div>
 
         {/* Action Button */}

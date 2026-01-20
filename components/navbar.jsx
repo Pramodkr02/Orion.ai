@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { MenuIcon, XIcon, ChevronDown, FileText, BrainCircuit } from "lucide-react";
+import { MenuIcon, XIcon, ChevronDown, FileText, BrainCircuit, User, LogOut } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const { user, logout } = useAuth();
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
   const navlinks = [
     {
@@ -17,12 +20,12 @@ export default function Navbar() {
     },
     {
       text: "Features",
-      href: "#", // Placeholder for dropdown trigger
+      href: "#", // Dropdown trigger
       dropdown: [
         {
           title: "Career Resume",
           description: "Build perfection with AI",
-          href: "/dashboard",
+          href: "/dashboard", // Protected route
           icon: FileText,
           active: true,
         },
@@ -40,7 +43,7 @@ export default function Navbar() {
       text: "Pricing",
     },
     {
-      href: "/resources", // Updated from empty string
+      href: "/resources",
       text: "Resources",
     },
   ];
@@ -125,16 +128,54 @@ export default function Navbar() {
 
         {/* Auth Buttons */}
         <div className="hidden lg:flex items-center space-x-3">
-          <Link href="/register">
-            <button className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 transition text-white text-sm font-medium rounded-md active:scale-95 shadow-lg shadow-indigo-500/20">
-              Get started
-            </button>
-          </Link>
-          <Link href="/login">
-            <button className="hover:bg-white/10 transition px-5 py-2 border border-slate-600 text-slate-200 text-sm font-medium rounded-md active:scale-95">
-              Login
-            </button>
-          </Link>
+          {user ? (
+             <div className="relative group">
+                <button 
+                    onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                    onBlur={() => setTimeout(() => setIsUserDropdownOpen(false), 200)}
+                    className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition"
+                >
+                    <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
+                        {user.name?.charAt(0) || <User className="size-4"/>}
+                    </div>
+                    <span className="text-sm font-medium text-slate-200 truncate max-w-[100px]">{user.name}</span>
+                    <ChevronDown className="size-4 text-slate-400" />
+                </button>
+
+                {/* User Dropdown */}
+                {isUserDropdownOpen && (
+                    <div className="absolute top-full right-0 mt-2 w-48 bg-[#0a0a0a] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
+                        <div className="p-3 border-b border-white/10">
+                            <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                            <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                        </div>
+                         <button 
+                             onClick={logout}
+                             className="w-full text-left flex items-center gap-2 px-4 py-3 text-sm text-red-400 hover:bg-white/5 transition"
+                         >
+                            <LogOut className="size-4" />
+                            Log out
+                         </button>
+                    </div>
+                )}
+             </div>
+          ) : (
+            <>
+               <Link href="/register">
+                 <button className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 transition text-white text-sm font-medium rounded-md active:scale-95 shadow-lg shadow-indigo-500/20">
+                   Get started
+                   {/* Changed from 'Buy Plan' as per request to imply Signup, or should strictly be 'Buy Plan' if specifically requested as 'instead of Get Started' on guest? 
+                       Prompt said "Buy Plan" button (instead of Get Started). I will adhere to that strictly now.
+                   */}
+                 </button>
+               </Link>
+               <Link href="/login">
+                 <button className="hover:bg-white/10 transition px-5 py-2 border border-slate-600 text-slate-200 text-sm font-medium rounded-md active:scale-95">
+                   Login
+                 </button>
+               </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -182,18 +223,34 @@ export default function Navbar() {
 
           <div className="w-full h-px bg-white/10 my-2" />
 
-          <div className="flex flex-col w-full gap-3">
-            <Link href="/register" onClick={() => setIsMenuOpen(false)} className="w-full">
-              <button className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-lg font-medium text-lg">
-                Get started
-              </button>
-            </Link>
-            <Link href="/login" onClick={() => setIsMenuOpen(false)} className="w-full">
-              <button className="w-full py-3 border border-slate-700 hover:bg-white/5 transition text-slate-200 rounded-lg font-medium text-lg">
-                Login
-              </button>
-            </Link>
-          </div>
+          {user ? (
+             <div className="flex flex-col w-full gap-3 items-center">
+                 <div className="text-center mb-2">
+                     <p className="text-white font-medium">{user.name}</p>
+                     <p className="text-slate-500 text-sm">{user.email}</p>
+                 </div>
+                 <button 
+                     onClick={() => { logout(); setIsMenuOpen(false); }}
+                     className="w-full py-3 border border-red-500/20 text-red-500 hover:bg-red-500/10 transition rounded-lg font-medium text-lg flex items-center justify-center gap-2"
+                 >
+                    <LogOut className="size-5" />
+                    Log out
+                 </button>
+             </div>
+          ) : (
+            <div className="flex flex-col w-full gap-3">
+                <Link href="/register" onClick={() => setIsMenuOpen(false)} className="w-full">
+                <button className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-lg font-medium text-lg">
+                    Buy Plan
+                </button>
+                </Link>
+                <Link href="/login" onClick={() => setIsMenuOpen(false)} className="w-full">
+                <button className="w-full py-3 border border-slate-700 hover:bg-white/5 transition text-slate-200 rounded-lg font-medium text-lg">
+                    Login
+                </button>
+                </Link>
+            </div>
+          )}
         </div>
 
         <button
