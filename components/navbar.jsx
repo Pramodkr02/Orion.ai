@@ -1,35 +1,54 @@
 "use client";
 
 import { useState } from "react";
-import { MenuIcon, XIcon } from "lucide-react";
+import { MenuIcon, XIcon, ChevronDown, FileText, BrainCircuit } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+
   const navlinks = [
     {
-      href: "/#creations",
-      text: "Creations",
+      href: "/",
+      text: "Home",
     },
     {
-      href: "/#about",
-      text: "About",
+      text: "Features",
+      href: "#", // Placeholder for dropdown trigger
+      dropdown: [
+        {
+          title: "Career Resume",
+          description: "Build perfection with AI",
+          href: "/dashboard",
+          icon: FileText,
+          active: true,
+        },
+        {
+          title: "AI Documentation",
+          description: "Coming Soon",
+          href: "#",
+          icon: BrainCircuit,
+          active: false,
+        },
+      ],
     },
     {
-      href: "/#testimonials",
-      text: "Testimonials",
+      href: "/#pricing",
+      text: "Pricing",
     },
     {
-      href: "/#contact",
-      text: "Contact",
+      href: "/resources", // Updated from empty string
+      text: "Resources",
     },
   ];
+
   return (
     <>
       <motion.nav
-        className="sticky top-0 z-50 flex items-center justify-between w-full h-18 px-6 md:px-16 lg:px-24 xl:px-32 backdrop-blur"
+        className="sticky top-0 z-50 flex items-center justify-between w-full h-18 px-6 md:px-16 lg:px-24 xl:px-32 backdrop-blur-md bg-black/50 border-b border-white/5"
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         viewport={{ once: true }}
@@ -45,66 +64,143 @@ export default function Navbar() {
           />
         </Link>
 
+        {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center gap-8 transition duration-500">
-          {navlinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="hover:text-slate-300 transition"
+          {navlinks.map((link, index) => (
+            <div
+              key={index}
+              className="relative group h-18 flex items-center"
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
             >
-              {link.text}
-            </Link>
+              <Link
+                href={link.href}
+                className="flex items-center gap-1.5 hover:text-indigo-400 transition text-sm font-medium text-slate-200"
+              >
+                {link.text}
+                {link.dropdown && (
+                  <ChevronDown className={`size-4 transition-transform duration-300 ${hoveredIndex === index ? "rotate-180" : ""}`} />
+                )}
+              </Link>
+              
+              {/* Dropdown Menu */}
+              <AnimatePresence>
+                {link.dropdown && hoveredIndex === index && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-14 left-1/2 -translate-x-1/2 w-72 bg-[#0a0a0a] border border-white/10 rounded-xl shadow-2xl overflow-hidden p-2"
+                  >
+                    <div className="absolute inset-0 bg-indigo-500/5 pointer-events-none" />
+                    {link.dropdown.map((item, idx) => (
+                      <Link
+                        key={idx}
+                        href={item.href}
+                        className={`group/item flex items-start gap-4 p-3 rounded-lg transition-all ${
+                          item.active 
+                            ? "hover:bg-white/5 cursor-pointer" 
+                            : "opacity-50 cursor-not-allowed grayscale"
+                        }`}
+                        onClick={(e) => !item.active && e.preventDefault()}
+                      >
+                        <div className={`p-2 rounded-lg ${item.active ? "bg-indigo-500/20 text-indigo-400 group-hover/item:text-indigo-300" : "bg-gray-800 text-gray-500"}`}>
+                          <item.icon className="size-5" />
+                        </div>
+                        <div>
+                          <h4 className={`text-sm font-semibold ${item.active ? "text-white group-hover/item:text-indigo-200" : "text-gray-500"}`}>
+                            {item.title}
+                          </h4>
+                          <p className="text-xs text-slate-400 mt-0.5">{item.description}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           ))}
         </div>
 
-        <div className="hidden lg:block space-x-3">
+        {/* Auth Buttons */}
+        <div className="hidden lg:flex items-center space-x-3">
           <Link href="/register">
-            <button className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-md active:scale-95">
+            <button className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 transition text-white text-sm font-medium rounded-md active:scale-95 shadow-lg shadow-indigo-500/20">
               Get started
             </button>
           </Link>
           <Link href="/login">
-            <button className="hover:bg-slate-300/20 transition px-6 py-2 border border-slate-400 rounded-md active:scale-95">
+            <button className="hover:bg-white/10 transition px-5 py-2 border border-slate-600 text-slate-200 text-sm font-medium rounded-md active:scale-95">
               Login
             </button>
           </Link>
         </div>
+
+        {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMenuOpen(true)}
-          className="lg:hidden active:scale-90 transition"
+          className="lg:hidden active:scale-90 transition text-white"
         >
-          <MenuIcon className="size-6.5" />
+          <MenuIcon className="size-7" />
         </button>
       </motion.nav>
+
+      {/* Mobile Menu Overlay */}
       <div
-        className={`fixed inset-0 z-[100] bg-black/60 backdrop-blur flex flex-col items-center justify-center text-lg gap-8 lg:hidden transition-transform duration-400 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center text-lg gap-8 lg:hidden transition-transform duration-500 ${
+          isMenuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
       >
-        {navlinks.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            {link.text}
-          </Link>
-        ))}
-        <div className="flex flex-col gap-4 items-center mt-4">
-          <Link href="/register" onClick={() => setIsMenuOpen(false)}>
-            <button className="px-10 py-3 bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-md active:scale-95 w-48 text-base font-medium">
-              Get started
-            </button>
-          </Link>
-          <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-            <button className="hover:bg-slate-300/20 transition px-10 py-3 border border-slate-400 rounded-md active:scale-95 w-48 text-base font-medium">
-              Login
-            </button>
-          </Link>
+        <div className="flex flex-col items-center gap-6 w-full max-w-sm px-6">
+          {navlinks.map((link, index) => (
+             link.dropdown ? (
+               <div key={index} className="flex flex-col items-center gap-4 w-full">
+                 <span className="text-slate-500 font-semibold uppercase tracking-wider text-sm">{link.text}</span>
+                 {link.dropdown.map((item, idx) => (
+                   <Link
+                    key={idx}
+                    href={item.href}
+                    onClick={() => item.active && setIsMenuOpen(false)}
+                    className={`text-xl font-medium ${item.active ? "text-white" : "text-slate-600"}`}
+                   >
+                     {item.title}
+                   </Link>
+                 ))}
+               </div>
+             ) : (
+              <Link
+                key={index}
+                href={link.href}
+                onClick={() => setIsMenuOpen(false)}
+                className="text-2xl font-medium text-slate-200 hover:text-indigo-400 transition"
+              >
+                {link.text}
+              </Link>
+             )
+          ))}
+
+          <div className="w-full h-px bg-white/10 my-2" />
+
+          <div className="flex flex-col w-full gap-3">
+            <Link href="/register" onClick={() => setIsMenuOpen(false)} className="w-full">
+              <button className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-lg font-medium text-lg">
+                Get started
+              </button>
+            </Link>
+            <Link href="/login" onClick={() => setIsMenuOpen(false)} className="w-full">
+              <button className="w-full py-3 border border-slate-700 hover:bg-white/5 transition text-slate-200 rounded-lg font-medium text-lg">
+                Login
+              </button>
+            </Link>
+          </div>
         </div>
+
         <button
           onClick={() => setIsMenuOpen(false)}
-          className="active:ring-3 active:ring-white aspect-square size-10 p-1 items-center justify-center bg-slate-100 hover:bg-slate-200 transition text-black rounded-md flex mt-4"
+          className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition"
         >
-          <XIcon />
+          <XIcon className="size-6" />
         </button>
       </div>
     </>

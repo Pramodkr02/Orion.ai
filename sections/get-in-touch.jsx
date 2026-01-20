@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import SectionTitle from "@/components/section-title";
 import { ArrowUpRight, SendIcon } from "lucide-react";
